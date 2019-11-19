@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CountDownView">
+        <!--        时分秒中间分分隔文字，中文显示时，后面会显示秒 符号则没有-->
+        <attr name="CountDownViewSeparateType">
+            <enum name="symbol" value="0" />
+            <enum name="chinese" value="1" />
+        </attr>
+        <!--        文字显示位置-->
+        <attr name="CountDownViewTextGravity">
+            <enum name="GRAVITY_CENTER" value="0" />
+            <enum name="GRAVITY_LEFT" value="1" />
+            <enum name="GRAVITY_RIGHT" value="2" />
+            <enum name="GRAVITY_TOP" value="3" />
+            <enum name="GRAVITY_BOTTOM" value="4" />
+        </attr>
+        <!--        时间文字显示颜色-->
+        <attr name="CountDownViewTimeTextColor" format="color" />
+        <attr name="CountDownViewTimeTextSize" format="dimension" />
+        <!--        分隔文字或字符显示颜色-->
+        <attr name="CountDownViewSeparateTextColor" format="color" />
+        <attr name="CountDownViewSeparateTextSize" format="dimension" />
+        <attr name="CountDownViewHourBackground" format="reference" />
+        <attr name="CountDownViewMinuteBackground" format="reference" />
+        <attr name="CountDownViewSecondBackground" format="reference" />
+        <attr name="CountDownViewTimeTextStyle">
+            <enum name="bold" value="0" />
+            <enum name="normal" value="1" />
+            <enum name="italic" value="2" />
+        </attr>
+        <attr name="CountDownViewSeparateTextStyle">
+            <enum name="bold" value="0" />
+            <enum name="normal" value="1" />
+            <enum name="italic" value="2" />
+        </attr>
+        <attr name="CountDownViewSeparateBackground" format="reference" />
+        <attr name="CountDownViewSeparateWidth" format="dimension" />
+        <attr name="CountDownViewSeparateHeight" format="dimension" />
+        <attr name="CountDownViewTimeWidth" format="dimension" />
+        <attr name="CountDownViewTimeHeight" format="dimension" />
+    </declare-styleable>
+</resources>
