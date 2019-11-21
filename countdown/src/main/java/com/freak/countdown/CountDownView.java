@@ -5,9 +5,9 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -28,32 +27,32 @@ import java.util.concurrent.Executors;
  * <p>
  * 使用方法
  * countdownView.setCountTime(3660) // 设置倒计时时间戳
- * .setHourTvBackgroundRes(R.mipmap.panicbuy_time)
- * .setHourTvTextColorHex("#FFFFFF")
- * .setHourTvGravity(CountDownView.CountDownViewGravity.GRAVITY_CENTER)
- * .setHourTvTextSize(21)
+ * .setHourTextViewBackgroundRes(R.mipmap.panicbuy_time)
+ * .setHourTextViewTextColorHex("#FFFFFF")
+ * .setHourTextViewGravity(CountDownView.CountDownViewGravity.GRAVITY_CENTER)
+ * .setHourTextViewTextSize(21)
  * <p>
- * .setHourColonTvBackgroundColorHex("#00FFFFFF")
- * .setHourColonTvSize(18, 0)
+ * .setHourColonTextViewBackgroundColorHex("#00FFFFFF")
+ * .setHourColonTextViewSize(18, 0)
  * <p>
- * .setHourColonTvTextColorHex("#FF7198")
- * .setHourColonTvGravity(CountDownView.CountDownViewGravity.GRAVITY_CENTER)
- * .setHourColonTvTextSize(21)
+ * .setHourColonTextViewTextColorHex("#FF7198")
+ * .setHourColonTextViewGravity(CountDownView.CountDownViewGravity.GRAVITY_CENTER)
+ * .setHourColonTextViewTextSize(21)
  * <p>
- * .setMinuteTvBackgroundRes(R.mipmap.panicbuy_time)
- * .setMinuteTvTextColorHex("#FFFFFF")
- * .setMinuteTvTextSize(21)
+ * .setMinuteTextViewBackgroundRes(R.mipmap.panicbuy_time)
+ * .setMinuteTextViewTextColorHex("#FFFFFF")
+ * .setMinuteTextViewTextSize(21)
  * <p>
- * .setMinuteColonTvSize(18, 0)
- * .setMinuteColonTvTextColorHex("#FF7198")
- * .setMinuteColonTvTextSize(21)
+ * .setMinuteColonTextViewSize(18, 0)
+ * .setMinuteColonTextViewTextColorHex("#FF7198")
+ * .setMinuteColonTextViewTextSize(21)
  * <p>
- * .setSecondTvBackgroundRes(R.mipmap.panicbuy_time)
- * .setSecondTvTextColorHex("#FFFFFF")
- * .setSecondTvTextSize(21)
+ * .setSecondTextViewBackgroundRes(R.mipmap.panicbuy_time)
+ * .setSecondTextViewTextColorHex("#FFFFFF")
+ * .setSecondTextViewTextSize(21)
  * <p>
- * //                .setTimeTvWH(18, 40)
- * //                .setColonTvSize(30)
+ * //                .setTimeTextViewWH(18, 40)
+ * //                .setColonTextViewSize(30)
  * <p>
  * // 开启倒计时
  * .startCountDown()
@@ -85,10 +84,11 @@ public class CountDownView extends LinearLayout {
     }
 
     private Context context;
-    private TextView hourTextView, minuteTextView, secondTextView, hourColonTextView, minuteColonTextView, secondColonTextView;
-    private long timeStamp;// 倒计时时间戳
+    private TextView textViewDay, textViewColonDay, hourTextView, minuteTextView, secondTextView, hourColonTextView, minuteColonTextView, secondColonTextView;
+    private long timeStamp;// 倒计时时间（单位秒）
     private boolean isContinue = false;// 是否开启倒计时
     private ExecutorService mExecutorService = Executors.newSingleThreadExecutor();// 缓存线程池
+    private final String mChineseDatSeparate = "天";
     //小时与分钟分隔文字 例如19:20
     private final String mChineseHourSeparate = "小时";
     //分钟与秒钟的分隔文字
@@ -118,6 +118,7 @@ public class CountDownView extends LinearLayout {
     private int separateTextSize = 12;
     private int timeTextColor = Color.BLACK;
     private int timeTextSize = 12;
+    private int dayBackground;
     private int hourBackground;
     private int minuteBackground;
     private int secondBackground;
@@ -131,6 +132,8 @@ public class CountDownView extends LinearLayout {
 
     private int separateWidth;
     private int separateHeight;
+    private boolean isCloseDay = false;
+    private int margin = 0;
 
     public CountDownView(Context context) {
         this(context, null);
@@ -163,7 +166,9 @@ public class CountDownView extends LinearLayout {
                 timeTextSize = typedArray.getDimensionPixelSize(attr, timeTextSize);
             } else if (attr == R.styleable.CountDownView_CountDownViewSeparateTextSize) {
                 separateTextSize = typedArray.getDimensionPixelSize(attr, separateTextSize);
-            } else if (attr == R.styleable.CountDownView_CountDownViewHourBackground) {
+            } else if (attr == R.styleable.CountDownView_CountDownViewDayBackground) {
+                dayBackground = typedArray.getResourceId(attr, dayBackground);
+            }else if (attr == R.styleable.CountDownView_CountDownViewHourBackground) {
                 hourBackground = typedArray.getResourceId(attr, hourBackground);
             } else if (attr == R.styleable.CountDownView_CountDownViewMinuteBackground) {
                 minuteBackground = typedArray.getResourceId(attr, minuteBackground);
@@ -179,8 +184,13 @@ public class CountDownView extends LinearLayout {
                 timeWidth = typedArray.getDimensionPixelOffset(attr, timeWidth);
             } else if (attr == R.styleable.CountDownView_CountDownViewTimeHeight) {
                 timeHeight = typedArray.getDimensionPixelOffset(attr, timeHeight);
+            } else if (attr == R.styleable.CountDownView_CountDownViewIsCloseDay) {
+                isCloseDay = typedArray.getBoolean(attr, isCloseDay);
+            }else if (attr == R.styleable.CountDownView_CountDownViewSeparateMargin) {
+                margin = typedArray.getDimensionPixelOffset(attr, margin);
             }
         }
+        typedArray.recycle();
         switch (gravity) {
             case GRAVITY_CENTER:
                 gravity = Gravity.CENTER;
@@ -228,7 +238,35 @@ public class CountDownView extends LinearLayout {
         this.setOrientation(HORIZONTAL);
         this.setGravity(Gravity.CENTER_VERTICAL);
         ViewGroup.LayoutParams params = new LayoutParams(timeWidth, timeHeight);
+        LinearLayout.LayoutParams layoutParams=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(margin,0,margin,0);
         // 添加子控件
+        //天控件
+        if (separateType == chinese) {
+            textViewDay = new TextView(this.context);
+            textViewDay.setTextColor(timeTextColor);
+            textViewDay.setBackgroundResource(dayBackground);
+            textViewDay.setTextSize(timeTextSize);
+            textViewDay.setIncludeFontPadding(false);
+            textViewDay.setGravity(gravity);
+            textViewDay.setTypeface(Typeface.defaultFromStyle(timeTextStyle));
+            textViewDay.setLayoutParams(params);
+            this.addView(textViewDay);
+
+            textViewColonDay = new TextView(this.context);
+            textViewColonDay = new TextView(this.context);
+            textViewColonDay.setTextColor(separateTextColor);
+            textViewColonDay.setBackgroundResource(separateBackground);
+            textViewColonDay.setTextSize(separateTextSize);
+            textViewColonDay.setText((mChineseDatSeparate));
+            textViewColonDay.setGravity(gravity);
+            textViewColonDay.setIncludeFontPadding(false);
+            textViewColonDay.setTypeface(Typeface.defaultFromStyle(separateTextStyle));
+            textViewColonDay.setLayoutParams(layoutParams);
+            this.addView(textViewColonDay);
+            textViewDay.setVisibility(isCloseDay ? GONE : VISIBLE);
+            textViewColonDay.setVisibility(isCloseDay ? GONE : VISIBLE);
+        }
         // 小时控件
         hourTextView = new TextView(this.context);
         hourTextView.setTextColor(timeTextColor);
@@ -248,6 +286,7 @@ public class CountDownView extends LinearLayout {
         hourColonTextView.setGravity(gravity);
         hourColonTextView.setIncludeFontPadding(false);
         hourColonTextView.setTypeface(Typeface.defaultFromStyle(separateTextStyle));
+        hourColonTextView.setLayoutParams(layoutParams);
         this.addView(hourColonTextView);
         // 分钟控件
         minuteTextView = new TextView(this.context);
@@ -268,6 +307,7 @@ public class CountDownView extends LinearLayout {
         minuteColonTextView.setGravity(gravity);
         minuteColonTextView.setIncludeFontPadding(false);
         minuteColonTextView.setTypeface(Typeface.defaultFromStyle(separateTextStyle));
+        minuteColonTextView.setLayoutParams(layoutParams);
         this.addView(minuteColonTextView);
         // 秒控件
         secondTextView = new TextView(this.context);
@@ -288,6 +328,7 @@ public class CountDownView extends LinearLayout {
             secondColonTextView.setGravity(gravity);
             secondColonTextView.setIncludeFontPadding(false);
             secondColonTextView.setTypeface(Typeface.defaultFromStyle(separateTextStyle));
+            secondTextView.setLayoutParams(params);
             this.addView(secondColonTextView);
         }
     }
@@ -299,7 +340,7 @@ public class CountDownView extends LinearLayout {
      * @param height 高 0取默认值
      * @return CountDownView
      */
-    public CountDownView setTimeTvWH(int width, int height) {
+    public CountDownView setTimeTextViewWH(int width, int height) {
         if (width > 0 && height > 0) {
             ViewGroup.LayoutParams params = new LayoutParams(width, height);
             hourTextView.setLayoutParams(params);
@@ -315,7 +356,7 @@ public class CountDownView extends LinearLayout {
      * @param size 字体大小
      * @return CountDownView
      */
-    public CountDownView setTimeTvSize(float size) {
+    public CountDownView setTimeTextViewSize(float size) {
         hourTextView.setTextSize(size);
         minuteTextView.setTextSize(size);
         secondTextView.setTextSize(size);
@@ -328,7 +369,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 字体颜色十六进制 “#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setTimeTvTextColorHex(String colorHex) {
+    public CountDownView setTimeTextViewTextColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         hourTextView.setTextColor(color);
         minuteTextView.setTextColor(color);
@@ -342,7 +383,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 背景颜色16进制“#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setTimeTvBackgroundColorHex(String colorHex) {
+    public CountDownView setTimeTextViewBackgroundColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         hourTextView.setBackgroundColor(color);
         minuteTextView.setBackgroundColor(color);
@@ -356,7 +397,7 @@ public class CountDownView extends LinearLayout {
      * @param res 背景资源ID
      * @return CountDownView
      */
-    public CountDownView setTimeTvBackgroundRes(int res) {
+    public CountDownView setTimeTextViewBackgroundRes(int res) {
         hourTextView.setBackgroundResource(res);
         minuteTextView.setBackgroundResource(res);
         secondTextView.setBackgroundResource(res);
@@ -369,7 +410,7 @@ public class CountDownView extends LinearLayout {
      * @param drawable 背景资源Drawable
      * @return CountDownView
      */
-    public CountDownView setTimeTvBackground(Drawable drawable) {
+    public CountDownView setTimeTextViewBackground(Drawable drawable) {
         if (drawable != null) {
             hourTextView.setBackground(drawable);
             minuteTextView.setBackground(drawable);
@@ -383,7 +424,7 @@ public class CountDownView extends LinearLayout {
      *
      * @param countDownViewGravity 左上右下中
      */
-    public CountDownView setTimeTvGravity(CountDownViewGravity countDownViewGravity) {
+    public CountDownView setTimeTextViewGravity(CountDownViewGravity countDownViewGravity) {
         int gravity = Gravity.CENTER;
         if (countDownViewGravity == CountDownViewGravity.GRAVITY_BOTTOM) {
             gravity = Gravity.BOTTOM;
@@ -410,7 +451,7 @@ public class CountDownView extends LinearLayout {
      * @param height 高 0取默认值
      * @return CountDownView
      */
-    public CountDownView setColonTvWH(int width, int height) {
+    public CountDownView setColonTextViewWH(int width, int height) {
         ViewGroup.LayoutParams params = new LayoutParams(width, height);
         hourColonTextView.setLayoutParams(params);
         minuteColonTextView.setLayoutParams(params);
@@ -423,7 +464,7 @@ public class CountDownView extends LinearLayout {
      * @param size 字体大小
      * @return CountDownView
      */
-    public CountDownView setColonTvSize(float size) {
+    public CountDownView setColonTextViewSize(float size) {
         hourColonTextView.setTextSize(size);
         minuteColonTextView.setTextSize(size);
         return this;
@@ -435,7 +476,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 字体颜色十六进制 “#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setColonTvTextColorHex(String colorHex) {
+    public CountDownView setColonTextViewTextColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         hourColonTextView.setTextColor(color);
         minuteColonTextView.setTextColor(color);
@@ -448,7 +489,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 背景颜色16进制“#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setColonTvBackgroundColorHex(String colorHex) {
+    public CountDownView setColonTextViewBackgroundColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         hourColonTextView.setBackgroundColor(color);
         minuteColonTextView.setBackgroundColor(color);
@@ -461,7 +502,7 @@ public class CountDownView extends LinearLayout {
      * @param res 背景资源ID
      * @return CountDownView
      */
-    public CountDownView setColonTvBackgroundRes(int res) {
+    public CountDownView setColonTextViewBackgroundRes(int res) {
         hourColonTextView.setBackgroundResource(res);
         minuteColonTextView.setBackgroundResource(res);
         return this;
@@ -473,7 +514,7 @@ public class CountDownView extends LinearLayout {
      * @param drawable 背景资源Drawable
      * @return CountDownView
      */
-    public CountDownView setColonTvBackground(Drawable drawable) {
+    public CountDownView setColonTextViewBackground(Drawable drawable) {
         if (drawable != null) {
             hourColonTextView.setBackground(drawable);
             minuteColonTextView.setBackground(drawable);
@@ -486,7 +527,7 @@ public class CountDownView extends LinearLayout {
      *
      * @param countDownViewGravity 左上右下中
      */
-    public CountDownView setColonTvGravity(CountDownViewGravity countDownViewGravity) {
+    public CountDownView setColonTextViewGravity(CountDownViewGravity countDownViewGravity) {
         int gravity = Gravity.CENTER;
         if (countDownViewGravity == CountDownViewGravity.GRAVITY_BOTTOM) {
             gravity = Gravity.BOTTOM;
@@ -512,7 +553,7 @@ public class CountDownView extends LinearLayout {
      * @param height 高 0取默认值
      * @return CountDownView
      */
-    public CountDownView setHourTvSize(int width, int height) {
+    public CountDownView setHourTextViewSize(int width, int height) {
         ViewGroup.LayoutParams hourParams = hourTextView.getLayoutParams();
         if (hourParams != null) {
             if (width > 0)
@@ -530,7 +571,7 @@ public class CountDownView extends LinearLayout {
      * @param res 背景资源ID
      * @return CountDownView
      */
-    public CountDownView setHourTvBackgroundRes(int res) {
+    public CountDownView setHourTextViewBackgroundRes(int res) {
         hourTextView.setBackgroundResource(res);
         return this;
     }
@@ -541,7 +582,7 @@ public class CountDownView extends LinearLayout {
      * @param drawable 背景资源Drawable
      * @return CountDownView
      */
-    public CountDownView setHourTvBackground(Drawable drawable) {
+    public CountDownView setHourTextViewBackground(Drawable drawable) {
         if (drawable != null) {
             hourTextView.setBackground(drawable);
         }
@@ -554,7 +595,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 背景颜色16进制“#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setHourTvBackgroundColorHex(String colorHex) {
+    public CountDownView setHourTextViewBackgroundColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         hourTextView.setBackgroundColor(color);
         return this;
@@ -566,7 +607,7 @@ public class CountDownView extends LinearLayout {
      * @param size 字体大小
      * @return CountDownView
      */
-    public CountDownView setHourTvTextSize(float size) {
+    public CountDownView setHourTextViewTextSize(float size) {
         hourTextView.setTextSize(size);
         return this;
     }
@@ -577,7 +618,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 字体颜色十六进制 “#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setHourTvTextColorHex(String colorHex) {
+    public CountDownView setHourTextViewTextColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         hourTextView.setTextColor(color);
         return this;
@@ -588,7 +629,7 @@ public class CountDownView extends LinearLayout {
      *
      * @param countDownViewGravity 左上右下中
      */
-    public CountDownView setHourTvGravity(CountDownViewGravity countDownViewGravity) {
+    public CountDownView setHourTextViewGravity(CountDownViewGravity countDownViewGravity) {
         int gravity = Gravity.CENTER;
         if (countDownViewGravity == CountDownViewGravity.GRAVITY_BOTTOM) {
             gravity = Gravity.BOTTOM;
@@ -614,7 +655,7 @@ public class CountDownView extends LinearLayout {
      * @param bottom 下边距 px
      * @return CountDownView
      */
-    public CountDownView setHourTvPadding(int left, int top, int right, int bottom) {
+    public CountDownView setHourTextViewPadding(int left, int top, int right, int bottom) {
         hourTextView.setPadding(left, top, right, bottom);
         return this;
     }
@@ -628,7 +669,7 @@ public class CountDownView extends LinearLayout {
      * @param bottom 下边距 px
      * @return CountDownView
      */
-    public CountDownView setHourTvMargins(int left, int top, int right, int bottom) {
+    public CountDownView setHourTextViewMargins(int left, int top, int right, int bottom) {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(left, top, right, bottom);
         minuteTextView.setLayoutParams(params);
@@ -641,7 +682,7 @@ public class CountDownView extends LinearLayout {
      * @param bool true/false
      * @return CountDownView
      */
-    public CountDownView setHourTvBold(boolean bool) {
+    public CountDownView setHourTextViewBold(boolean bool) {
         hourTextView.getPaint().setFakeBoldText(bool);
         return this;
     }
@@ -654,7 +695,7 @@ public class CountDownView extends LinearLayout {
      * @param height 高 0取默认值
      * @return CountDownView
      */
-    public CountDownView setMinuteTvSize(int width, int height) {
+    public CountDownView setMinuteTextViewSize(int width, int height) {
         ViewGroup.LayoutParams minuteParams = minuteTextView.getLayoutParams();
         if (minuteParams != null) {
             if (width > 0)
@@ -672,7 +713,7 @@ public class CountDownView extends LinearLayout {
      * @param res 背景资源ID
      * @return CountDownView
      */
-    public CountDownView setMinuteTvBackgroundRes(int res) {
+    public CountDownView setMinuteTextViewBackgroundRes(int res) {
         minuteTextView.setBackgroundResource(res);
         return this;
     }
@@ -683,7 +724,7 @@ public class CountDownView extends LinearLayout {
      * @param drawable 背景资源Drawable
      * @return CountDownView
      */
-    public CountDownView setMinuteTvBackground(Drawable drawable) {
+    public CountDownView setMinuteTextViewBackground(Drawable drawable) {
         if (drawable != null) {
             minuteTextView.setBackground(drawable);
         }
@@ -696,7 +737,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 背景颜色16进制“#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setMinuteTvBackgroundColorHex(String colorHex) {
+    public CountDownView setMinuteTextViewBackgroundColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         minuteTextView.setBackgroundColor(color);
         return this;
@@ -708,7 +749,7 @@ public class CountDownView extends LinearLayout {
      * @param size 字体大小
      * @return CountDownView
      */
-    public CountDownView setMinuteTvTextSize(float size) {
+    public CountDownView setMinuteTextViewTextSize(float size) {
         minuteTextView.setTextSize(size);
         return this;
     }
@@ -719,7 +760,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 字体颜色十六进制 “#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setMinuteTvTextColorHex(String colorHex) {
+    public CountDownView setMinuteTextViewTextColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         minuteTextView.setTextColor(color);
         return this;
@@ -730,7 +771,7 @@ public class CountDownView extends LinearLayout {
      *
      * @param countDownViewGravity 左上右下中
      */
-    public CountDownView setMinuteTvGravity(CountDownViewGravity countDownViewGravity) {
+    public CountDownView setMinuteTextViewGravity(CountDownViewGravity countDownViewGravity) {
         int gravity = Gravity.CENTER;
         if (countDownViewGravity == CountDownViewGravity.GRAVITY_BOTTOM) {
             gravity = Gravity.BOTTOM;
@@ -756,7 +797,7 @@ public class CountDownView extends LinearLayout {
      * @param bottom 下边距 px
      * @return CountDownView
      */
-    public CountDownView setMinuteTvPadding(int left, int top, int right, int bottom) {
+    public CountDownView setMinuteTextViewPadding(int left, int top, int right, int bottom) {
         minuteTextView.setPadding(left, top, right, bottom);
         return this;
     }
@@ -770,7 +811,7 @@ public class CountDownView extends LinearLayout {
      * @param bottom 下边距 px
      * @return CountDownView
      */
-    public CountDownView setMinuteTvMargins(int left, int top, int right, int bottom) {
+    public CountDownView setMinuteTextViewMargins(int left, int top, int right, int bottom) {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(left, top, right, bottom);
         minuteTextView.setLayoutParams(params);
@@ -783,7 +824,7 @@ public class CountDownView extends LinearLayout {
      * @param bool true/false
      * @return CountDownView
      */
-    public CountDownView setMinuteTvBold(boolean bool) {
+    public CountDownView setMinuteTextViewBold(boolean bool) {
         minuteTextView.getPaint().setFakeBoldText(bool);
         return this;
     }
@@ -796,7 +837,7 @@ public class CountDownView extends LinearLayout {
      * @param height 高 0取默认值
      * @return CountDownView
      */
-    public CountDownView setSecondTvSize(int width, int height) {
+    public CountDownView setSecondTextViewSize(int width, int height) {
         ViewGroup.LayoutParams secondParams = secondTextView.getLayoutParams();
         if (secondParams != null) {
             if (width > 0)
@@ -814,7 +855,7 @@ public class CountDownView extends LinearLayout {
      * @param res 背景资源ID
      * @return CountDownView
      */
-    public CountDownView setSecondTvBackgroundRes(int res) {
+    public CountDownView setSecondTextViewBackgroundRes(int res) {
         secondTextView.setBackgroundResource(res);
         return this;
     }
@@ -825,7 +866,7 @@ public class CountDownView extends LinearLayout {
      * @param drawable 背景资源Drawable
      * @return CountDownView
      */
-    public CountDownView setSecondTvBackground(Drawable drawable) {
+    public CountDownView setSecondTextViewBackground(Drawable drawable) {
         if (drawable != null) {
             secondTextView.setBackground(drawable);
         }
@@ -838,7 +879,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 背景颜色16进制“#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setSecondTvBackgroundColorHex(String colorHex) {
+    public CountDownView setSecondTextViewBackgroundColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         secondTextView.setBackgroundColor(color);
         return this;
@@ -850,7 +891,7 @@ public class CountDownView extends LinearLayout {
      * @param size 字体大小
      * @return CountDownView
      */
-    public CountDownView setSecondTvTextSize(float size) {
+    public CountDownView setSecondTextViewTextSize(float size) {
         secondTextView.setTextSize(size);
         return this;
     }
@@ -861,7 +902,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 字体颜色十六进制 “#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setSecondTvTextColorHex(String colorHex) {
+    public CountDownView setSecondTextViewTextColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         secondTextView.setTextColor(color);
         return this;
@@ -872,7 +913,7 @@ public class CountDownView extends LinearLayout {
      *
      * @param countDownViewGravity 左上右下中
      */
-    public CountDownView setSecondTvGravity(CountDownViewGravity countDownViewGravity) {
+    public CountDownView setSecondTextViewGravity(CountDownViewGravity countDownViewGravity) {
         int gravity = Gravity.CENTER;
         if (countDownViewGravity == CountDownViewGravity.GRAVITY_BOTTOM) {
             gravity = Gravity.BOTTOM;
@@ -898,7 +939,7 @@ public class CountDownView extends LinearLayout {
      * @param bottom 下边距 px
      * @return CountDownView
      */
-    public CountDownView setSecondTvPadding(int left, int top, int right, int bottom) {
+    public CountDownView setSecondTextViewPadding(int left, int top, int right, int bottom) {
         secondTextView.setPadding(left, top, right, bottom);
         return this;
     }
@@ -912,7 +953,7 @@ public class CountDownView extends LinearLayout {
      * @param bottom 下边距 px
      * @return CountDownView
      */
-    public CountDownView setSecondTvMargins(int left, int top, int right, int bottom) {
+    public CountDownView setSecondTextViewMargins(int left, int top, int right, int bottom) {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(left, top, right, bottom);
         secondTextView.setLayoutParams(params);
@@ -925,7 +966,7 @@ public class CountDownView extends LinearLayout {
      * @param bool true/false
      * @return CountDownView
      */
-    public CountDownView setSecondTvBold(boolean bool) {
+    public CountDownView setSecondTextViewBold(boolean bool) {
         secondTextView.getPaint().setFakeBoldText(bool);
         return this;
     }
@@ -938,7 +979,7 @@ public class CountDownView extends LinearLayout {
      * @param height 高 0取默认值
      * @return CountDownView
      */
-    public CountDownView setHourColonTvSize(int width, int height) {
+    public CountDownView setHourColonTextViewSize(int width, int height) {
         ViewGroup.LayoutParams hourColonParams = hourColonTextView.getLayoutParams();
         if (hourColonParams != null) {
             if (width > 0)
@@ -956,7 +997,7 @@ public class CountDownView extends LinearLayout {
      * @param res 背景资源ID
      * @return CountDownView
      */
-    public CountDownView setHourColonTvBackgroundRes(int res) {
+    public CountDownView setHourColonTextViewBackgroundRes(int res) {
         hourColonTextView.setBackgroundResource(res);
         return this;
     }
@@ -967,7 +1008,7 @@ public class CountDownView extends LinearLayout {
      * @param drawable 背景资源Drawable
      * @return CountDownView
      */
-    public CountDownView setHourColonTvBackground(Drawable drawable) {
+    public CountDownView setHourColonTextViewBackground(Drawable drawable) {
         if (drawable != null) {
             hourColonTextView.setBackground(drawable);
         }
@@ -980,7 +1021,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 背景颜色16进制“#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setHourColonTvBackgroundColorHex(String colorHex) {
+    public CountDownView setHourColonTextViewBackgroundColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         hourColonTextView.setBackgroundColor(color);
         return this;
@@ -992,7 +1033,7 @@ public class CountDownView extends LinearLayout {
      * @param size 字体大小
      * @return CountDownView
      */
-    public CountDownView setHourColonTvTextSize(float size) {
+    public CountDownView setHourColonTextViewTextSize(float size) {
         hourColonTextView.setTextSize(size);
         return this;
     }
@@ -1003,7 +1044,7 @@ public class CountDownView extends LinearLayout {
      * @param hourColonText
      * @return
      */
-    public CountDownView setHourColonTvText(String hourColonText) {
+    public CountDownView setHourColonTextViewText(String hourColonText) {
         hourColonTextView.setText(hourColonText);
         return this;
     }
@@ -1014,7 +1055,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 字体颜色十六进制 “#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setHourColonTvTextColorHex(String colorHex) {
+    public CountDownView setHourColonTextViewTextColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         hourColonTextView.setTextColor(color);
         return this;
@@ -1025,7 +1066,7 @@ public class CountDownView extends LinearLayout {
      *
      * @param countDownViewGravity 左上右下中
      */
-    public CountDownView setHourColonTvGravity(CountDownViewGravity countDownViewGravity) {
+    public CountDownView setHourColonTextViewGravity(CountDownViewGravity countDownViewGravity) {
         int gravity = Gravity.CENTER;
         if (countDownViewGravity == CountDownViewGravity.GRAVITY_BOTTOM) {
             gravity = Gravity.BOTTOM;
@@ -1051,7 +1092,7 @@ public class CountDownView extends LinearLayout {
      * @param bottom 下边距 px
      * @return CountDownView
      */
-    public CountDownView setHourColonTvPadding(int left, int top, int right, int bottom) {
+    public CountDownView setHourColonTextViewPadding(int left, int top, int right, int bottom) {
         hourColonTextView.setPadding(left, top, right, bottom);
         return this;
     }
@@ -1065,7 +1106,7 @@ public class CountDownView extends LinearLayout {
      * @param bottom 下边距 px
      * @return CountDownView
      */
-    public CountDownView setHourColonTvMargins(int left, int top, int right, int bottom) {
+    public CountDownView setHourColonTextViewMargins(int left, int top, int right, int bottom) {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(left, top, right, bottom);
         hourColonTextView.setLayoutParams(params);
@@ -1078,7 +1119,7 @@ public class CountDownView extends LinearLayout {
      * @param bool true/false
      * @return CountDownView
      */
-    public CountDownView setHourColonTvBold(boolean bool) {
+    public CountDownView setHourColonTextViewBold(boolean bool) {
         hourColonTextView.getPaint().setFakeBoldText(bool);
         return this;
     }
@@ -1091,7 +1132,7 @@ public class CountDownView extends LinearLayout {
      * @param height 高 0取默认值
      * @return CountDownView
      */
-    public CountDownView setMinuteColonTvSize(int width, int height) {
+    public CountDownView setMinuteColonTextViewSize(int width, int height) {
         ViewGroup.LayoutParams minuteColonParams = minuteColonTextView.getLayoutParams();
         if (minuteColonParams != null) {
             if (width > 0)
@@ -1109,7 +1150,7 @@ public class CountDownView extends LinearLayout {
      * @param res 背景资源ID
      * @return CountDownView
      */
-    public CountDownView setMinuteColonTvBackgroundRes(int res) {
+    public CountDownView setMinuteColonTextViewBackgroundRes(int res) {
         minuteColonTextView.setBackgroundResource(res);
         return this;
     }
@@ -1120,7 +1161,7 @@ public class CountDownView extends LinearLayout {
      * @param drawable 背景资源Drawable
      * @return CountDownView
      */
-    public CountDownView setMinuteColonTvBackground(Drawable drawable) {
+    public CountDownView setMinuteColonTextViewBackground(Drawable drawable) {
         if (drawable != null) {
             minuteColonTextView.setBackground(drawable);
         }
@@ -1133,7 +1174,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 背景颜色16进制“#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setMinuteColonTvBackgroundColorHex(String colorHex) {
+    public CountDownView setMinuteColonTextViewBackgroundColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         minuteColonTextView.setBackgroundColor(color);
         return this;
@@ -1145,7 +1186,7 @@ public class CountDownView extends LinearLayout {
      * @param size 字体大小
      * @return CountDownView
      */
-    public CountDownView setMinuteColonTvTextSize(float size) {
+    public CountDownView setMinuteColonTextViewTextSize(float size) {
         minuteColonTextView.setTextSize(size);
         return this;
     }
@@ -1156,7 +1197,7 @@ public class CountDownView extends LinearLayout {
      * @param minuteColonText
      * @return
      */
-    public CountDownView setMinuteColonTvText(String minuteColonText) {
+    public CountDownView setMinuteColonTextViewText(String minuteColonText) {
         minuteColonTextView.setText(minuteColonText);
         return this;
     }
@@ -1167,7 +1208,7 @@ public class CountDownView extends LinearLayout {
      * @param colorHex 字体颜色十六进制 “#FFFFFF”
      * @return CountDownView
      */
-    public CountDownView setMinuteColonTvTextColorHex(String colorHex) {
+    public CountDownView setMinuteColonTextViewTextColorHex(String colorHex) {
         int color = Color.parseColor(colorHex);
         minuteColonTextView.setTextColor(color);
         return this;
@@ -1178,7 +1219,7 @@ public class CountDownView extends LinearLayout {
      *
      * @param countDownViewGravity 左上右下中
      */
-    public CountDownView setMinuteColonTvGravity(CountDownViewGravity countDownViewGravity) {
+    public CountDownView setMinuteColonTextViewGravity(CountDownViewGravity countDownViewGravity) {
         int gravity = Gravity.CENTER;
         if (countDownViewGravity == CountDownViewGravity.GRAVITY_BOTTOM) {
             gravity = Gravity.BOTTOM;
@@ -1204,7 +1245,7 @@ public class CountDownView extends LinearLayout {
      * @param bottom 下边距 px
      * @return CountDownView
      */
-    public CountDownView setMinuteColonTvPadding(int left, int top, int right, int bottom) {
+    public CountDownView setMinuteColonTextViewPadding(int left, int top, int right, int bottom) {
         minuteColonTextView.setPadding(left, top, right, bottom);
         return this;
     }
@@ -1218,7 +1259,7 @@ public class CountDownView extends LinearLayout {
      * @param bottom 下边距 px
      * @return CountDownView
      */
-    public CountDownView setMinuteColonTvMargins(int left, int top, int right, int bottom) {
+    public CountDownView setMinuteColonTextViewMargins(int left, int top, int right, int bottom) {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(left, top, right, bottom);
         minuteColonTextView.setLayoutParams(params);
@@ -1231,7 +1272,7 @@ public class CountDownView extends LinearLayout {
      * @param bool true/false
      * @return CountDownView
      */
-    public CountDownView setMinuteColonTvBold(boolean bool) {
+    public CountDownView setMinuteColonTextViewBold(boolean bool) {
         minuteColonTextView.getPaint().setFakeBoldText(bool);
         return this;
     }
@@ -1240,7 +1281,7 @@ public class CountDownView extends LinearLayout {
     /**
      * 设置倒计时-时间戳
      *
-     * @param timeStamp 倒计时时间戳，不能大于99小时
+     * @param timeStamp 倒计时结束时间戳
      * @return CountDownView
      */
     public CountDownView setCountTime(long timeStamp) {
@@ -1251,11 +1292,11 @@ public class CountDownView extends LinearLayout {
     /**
      * 设置倒计时-时间戳
      *
-     * @param timeStamp 倒计时时间
+     * @param countDowntime 倒计时时间
      * @return CountDownView
      */
-    public CountDownView setCountAllTime(long timeStamp) {
-        this.timeStamp = timeStamp;
+    public CountDownView setCountDownTime(long countDowntime) {
+        this.timeStamp = countDowntime;
         return this;
     }
 
@@ -1317,7 +1358,7 @@ public class CountDownView extends LinearLayout {
                 try {
                     while (isContinue) {
                         isContinue = timeStamp-- > 1;
-                        String[] times = CountDownUtil.secToTimes(timeStamp);
+                        String[] times = CountDownUtil.secToTimes(timeStamp, separateType, isCloseDay);
                         Message message = new Message();
                         message.obj = times;
                         message.what = UPDATE_UI_CODE;
@@ -1342,7 +1383,7 @@ public class CountDownView extends LinearLayout {
      * @param text     显示文本内容
      * @param textView 待显示的控件
      */
-    private void updateTvText(String text, TextView textView) {
+    private void updateTextViewText(String text, TextView textView) {
         textView.setText(text);
     }
 
@@ -1367,13 +1408,31 @@ public class CountDownView extends LinearLayout {
                         for (int i = 0; i < times.length; i++) {
                             switch (i) {
                                 case 0:// 时
-                                    currentCountDownView.updateTvText(times[0], currentCountDownView.hourTextView);
+                                    currentCountDownView.updateTextViewText(times[0], currentCountDownView.hourTextView);
                                     break;
                                 case 1:// 分
-                                    currentCountDownView.updateTvText(times[1], currentCountDownView.minuteTextView);
+                                    currentCountDownView.updateTextViewText(times[1], currentCountDownView.minuteTextView);
                                     break;
                                 case 2:// 秒
-                                    currentCountDownView.updateTvText(times[2], currentCountDownView.secondTextView);
+                                    currentCountDownView.updateTextViewText(times[2], currentCountDownView.secondTextView);
+                                    break;
+                                case 3:
+                                    //天
+                                    if (!currentCountDownView.isCloseDay) {
+                                        currentCountDownView.updateTextViewText(times[3], currentCountDownView.textViewDay);
+                                        if (TextUtils.isEmpty(times[3])) {
+                                            currentCountDownView.textViewColonDay.setVisibility(GONE);
+                                            currentCountDownView.textViewDay.setVisibility(GONE);
+                                        } else {
+                                            currentCountDownView.textViewColonDay.setVisibility(VISIBLE);
+                                            currentCountDownView.textViewDay.setVisibility(VISIBLE);
+                                        }
+                                    } else {
+                                        currentCountDownView.textViewDay.setVisibility(GONE);
+                                        currentCountDownView.textViewColonDay.setVisibility(GONE);
+                                    }
+                                    break;
+                                default:
                                     break;
                             }
                         }

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CountDownView">
-        <!--        时分秒中间分分隔文字，中文显示时，后面会显示秒 符号则没有-->
+        <!--        时分秒中间分分隔文字，中文显示时，后面会显示秒 符号则没有
+        在symbol模式 不会显示超过天的时间 使用chinese会根据时间显示天，如果超过24小时，则显示，反义，不显示-->
         <attr name="CountDownViewSeparateType">
             <enum name="symbol" value="0" />
             <enum name="chinese" value="1" />
@@ -14,29 +15,40 @@
             <enum name="GRAVITY_TOP" value="3" />
             <enum name="GRAVITY_BOTTOM" value="4" />
         </attr>
-        <!--        时间文字显示颜色-->
+        <!--        设置时间文字显示颜色-->
         <attr name="CountDownViewTimeTextColor" format="color" />
         <attr name="CountDownViewTimeTextSize" format="dimension" />
-        <!--        分隔文字或字符显示颜色-->
+        <!--        设置间隔字符显示颜色-->
         <attr name="CountDownViewSeparateTextColor" format="color" />
         <attr name="CountDownViewSeparateTextSize" format="dimension" />
+        <!--        设置时间显示背景-->
+        <attr name="CountDownViewDayBackground" format="reference" />
         <attr name="CountDownViewHourBackground" format="reference" />
         <attr name="CountDownViewMinuteBackground" format="reference" />
         <attr name="CountDownViewSecondBackground" format="reference" />
+        <!--        设置时间显示style-->
         <attr name="CountDownViewTimeTextStyle">
             <enum name="bold" value="0" />
             <enum name="normal" value="1" />
             <enum name="italic" value="2" />
         </attr>
+        <!--        设置间隔字符style-->
         <attr name="CountDownViewSeparateTextStyle">
             <enum name="bold" value="0" />
             <enum name="normal" value="1" />
             <enum name="italic" value="2" />
         </attr>
+        <!--        设置间隔字符背景-->
         <attr name="CountDownViewSeparateBackground" format="reference" />
+        <!--        设置间隔字符宽高-->
         <attr name="CountDownViewSeparateWidth" format="dimension" />
         <attr name="CountDownViewSeparateHeight" format="dimension" />
+        <!--        设置时间显示宽高-->
         <attr name="CountDownViewTimeWidth" format="dimension" />
         <attr name="CountDownViewTimeHeight" format="dimension" />
+        <!--        关闭天的显示，只在chinese模式生效，默认根据时间显示，如果设置为false，则不根据时间判断显示天-->
+        <attr name="CountDownViewIsCloseDay" format="boolean" />
+        <!--        时间显示和间隔符号\文字的间隔-->
+        <attr name="CountDownViewSeparateMargin" format="dimension" />
     </declare-styleable>
 </resources>
