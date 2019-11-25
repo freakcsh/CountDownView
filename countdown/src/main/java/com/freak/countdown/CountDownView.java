@@ -168,7 +168,7 @@ public class CountDownView extends LinearLayout {
                 separateTextSize = typedArray.getDimensionPixelSize(attr, separateTextSize);
             } else if (attr == R.styleable.CountDownView_CountDownViewDayBackground) {
                 dayBackground = typedArray.getResourceId(attr, dayBackground);
-            }else if (attr == R.styleable.CountDownView_CountDownViewHourBackground) {
+            } else if (attr == R.styleable.CountDownView_CountDownViewHourBackground) {
                 hourBackground = typedArray.getResourceId(attr, hourBackground);
             } else if (attr == R.styleable.CountDownView_CountDownViewMinuteBackground) {
                 minuteBackground = typedArray.getResourceId(attr, minuteBackground);
@@ -186,7 +186,7 @@ public class CountDownView extends LinearLayout {
                 timeHeight = typedArray.getDimensionPixelOffset(attr, timeHeight);
             } else if (attr == R.styleable.CountDownView_CountDownViewIsCloseDay) {
                 isCloseDay = typedArray.getBoolean(attr, isCloseDay);
-            }else if (attr == R.styleable.CountDownView_CountDownViewSeparateMargin) {
+            } else if (attr == R.styleable.CountDownView_CountDownViewSeparateMargin) {
                 margin = typedArray.getDimensionPixelOffset(attr, margin);
             }
         }
@@ -238,8 +238,8 @@ public class CountDownView extends LinearLayout {
         this.setOrientation(HORIZONTAL);
         this.setGravity(Gravity.CENTER_VERTICAL);
         ViewGroup.LayoutParams params = new LayoutParams(timeWidth, timeHeight);
-        LinearLayout.LayoutParams layoutParams=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(margin,0,margin,0);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(margin, 0, margin, 0);
         // 添加子控件
         //天控件
         if (separateType == chinese) {

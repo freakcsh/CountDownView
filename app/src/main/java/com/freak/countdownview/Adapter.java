@@ -14,6 +14,7 @@ import com.freak.countdown.CountDownView;
 import java.util.List;
 
 public class Adapter extends BaseQuickAdapter<TestEntity, BaseViewHolder> {
+    private static final String TAG = "CountDownAdapter";
     //用于退出activity,避免countdown，造成资源浪费。
     private SparseArray<CountDownView> countDownMap;
 
@@ -30,16 +31,16 @@ public class Adapter extends BaseQuickAdapter<TestEntity, BaseViewHolder> {
     }
 
     public void stopAllTime() {
-        Log.e("TAG", "停止倒计时");
+        Log.e(TAG, "停止倒计时");
         if (countDownMap == null) {
             return;
         }
-        Log.e("TAG", "size :  " + countDownMap.size());
+        Log.e(TAG, "size :  " + countDownMap.size());
         for (int i = 0, length = countDownMap.size(); i < length; i++) {
 
             CountDownView countDownView = countDownMap.get(countDownMap.keyAt(i));
             if (countDownView != null) {
-                Log.e("TAG", "停止倒计时  " + i);
+                Log.e(TAG, "停止倒计时  " + i);
                 countDownView.stopCountDown();
             }
         }

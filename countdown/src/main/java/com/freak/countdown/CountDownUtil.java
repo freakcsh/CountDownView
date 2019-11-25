@@ -6,6 +6,8 @@ import android.util.Log;
  * 字符串工具
  */
 public class CountDownUtil {
+    private static final String TAG = "CountDownView";
+
     /**
      * 整数(秒数)转换为时分秒数组
      *
@@ -49,7 +51,7 @@ public class CountDownUtil {
                     if (isCloseDay) {
                         minute = minute % 60;
                         second = (int) (time - hour * 3600 - minute * 60);
-                        Log.e("TAG", " 小时 " + hour + " 分钟 " + minute + " 秒 " + second);
+//                        Log.e(TAG, " 小时 " + hour + " 分钟 " + minute + " 秒 " + second);
                         timeStrings[0] = unitFormat(hour);
                         timeStrings[1] = unitFormat(minute);
                         timeStrings[2] = unitFormat(second);
@@ -65,7 +67,7 @@ public class CountDownUtil {
                             hour = hour % 24;
                             minute = minute % 60;
                             second = (int) (time - day * 24 * 3600 - hour * 3600 - minute * 60);
-                            Log.e("TAG", "天 " + day + " 小时 " + hour + " 分钟 " + minute + " 秒 " + second);
+//                            Log.e(TAG, "天 " + day + " 小时 " + hour + " 分钟 " + minute + " 秒 " + second);
                             timeStrings[0] = unitFormat(hour);
                             timeStrings[1] = unitFormat(minute);
                             timeStrings[2] = unitFormat(second);
@@ -76,7 +78,7 @@ public class CountDownUtil {
                 } else {
                     minute = minute % 60;
                     second = (int) (time - hour * 3600 - minute * 60);
-                    Log.e("TAG", " 小时 " + hour + " 分钟 " + minute + " 秒 " + second);
+//                    Log.e(TAG, " 小时 " + hour + " 分钟 " + minute + " 秒 " + second);
                     timeStrings[0] = unitFormat(hour);
                     timeStrings[1] = unitFormat(minute);
                     timeStrings[2] = unitFormat(second);
