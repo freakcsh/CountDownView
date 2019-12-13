@@ -31,9 +31,23 @@ public class CountDownUtil {
         int minute;
         int second;
         if (time <= 0) {
-            timeStrings[0] = "00";
-            timeStrings[1] = "00";
-            timeStrings[2] = "00";
+            if (type == 1) {
+                if (isCloseDay) {
+                    timeStrings[0] = "00";
+                    timeStrings[1] = "00";
+                    timeStrings[2] = "00";
+                } else {
+                    timeStrings[0] = "00";
+                    timeStrings[1] = "00";
+                    timeStrings[2] = "00";
+                    timeStrings[3] = "00";
+                }
+            } else {
+                timeStrings[0] = "00";
+                timeStrings[1] = "00";
+                timeStrings[2] = "00";
+            }
+
             return timeStrings;
         } else {
             //计算分钟

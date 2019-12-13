@@ -27,12 +27,12 @@ public class Main2Activity extends AppCompatActivity {
         recycle_view.setLayoutManager(new LinearLayoutManager(this));
         list = new ArrayList<>();
 
-        list.add(new TestEntity(86006));
-        list.add(new TestEntity(86106));
-        list.add(new TestEntity(86206));
+        list.add(new TestEntity(10));
+        list.add(new TestEntity(0));
+        list.add(new TestEntity(-1));
         list.add(new TestEntity(86306));
         list.add(new TestEntity(86406));
-        list.add(new TestEntity(86506));
+        list.add(new TestEntity(53628));
         adapter = new Adapter(R.layout.item_view, list);
         recycle_view.setAdapter(adapter);
     }

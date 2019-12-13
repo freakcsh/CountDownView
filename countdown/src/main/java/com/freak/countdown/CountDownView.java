@@ -1306,13 +1306,15 @@ public class CountDownView extends LinearLayout {
      * @return CountDownView
      */
     public CountDownView startCountDown() {
-        if (timeStamp <= 1) {
-            this.isContinue = false;
-            Log.e(TAG, "时间戳错误");
-        } else {
-            this.isContinue = true;
-            countDown();
-        }
+//        if (timeStamp <= 1) {
+//            this.isContinue = false;
+//            Log.e(TAG, "时间戳错误");
+//        } else {
+//            this.isContinue = true;
+//            countDown();
+//        }
+        this.isContinue = true;
+        countDown();
         return this;
     }
 

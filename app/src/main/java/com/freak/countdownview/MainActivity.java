@@ -30,9 +30,9 @@ public class MainActivity extends AppCompatActivity {
         count_down_view2 = findViewById(R.id.count_down_view2);
         test = findViewById(R.id.test);
 
-//        count_down_view.setCountTime(1574394865).startCountDown();
-//        count_down_view1.setCountDownTime(86406).startCountDown();
-//        count_down_view2.setCountDownTime(86406).startCountDown();
+        count_down_view.setCountTime(1574394865).startCountDown();
+        count_down_view1.setCountDownTime(-1).startCountDown();
+        count_down_view2.setCountDownTime(-1).startCountDown();
         test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
