@@ -88,6 +88,8 @@ public class CountDownView extends LinearLayout {
     private long timeStamp;// 倒计时时间（单位秒）
     private boolean isContinue = false;// 是否开启倒计时
     private boolean isNotification = false;// 是否提前通知
+    private boolean isNotificationFinish = false;// 是否提前通知
+    private int notificationTime = 0;
     private ExecutorService mExecutorService = Executors.newSingleThreadExecutor();// 缓存线程池
     private final String mChineseDatSeparate = "天";
     //小时与分钟分隔文字 例如19:20
@@ -1282,11 +1284,36 @@ public class CountDownView extends LinearLayout {
     /**
      * 设置倒计时-时间戳
      *
+     * @param timeStamp        倒计时结束时间戳
+     * @param notificationTime 提前通知时间（单位秒）
+     * @return CountDownView
+     */
+    public CountDownView setCountTime(long timeStamp, int notificationTime) {
+        this.timeStamp = (timeStamp - System.currentTimeMillis() / 1000);
+        this.notificationTime = notificationTime;
+        return this;
+    }
+
+    /**
+     * 设置倒计时-时间戳
+     *
      * @param timeStamp 倒计时结束时间戳
      * @return CountDownView
      */
     public CountDownView setCountTime(long timeStamp) {
         this.timeStamp = (timeStamp - System.currentTimeMillis() / 1000);
+        return this;
+    }
+
+    /**
+     * 设置倒计时-时间戳
+     *
+     * @param countDowntime 倒计时时间
+     * @return CountDownView
+     */
+    public CountDownView setCountDownTime(long countDowntime, int notificationTime) {
+        this.timeStamp = countDowntime;
+        this.notificationTime = notificationTime;
         return this;
     }
 
@@ -1362,7 +1389,7 @@ public class CountDownView extends LinearLayout {
                     while (isContinue) {
                         if (!isNotification) {
                             long time = timeStamp;
-                            isNotification = time - 1 < 8;
+                            isNotification = time - 1 <= notificationTime;
                         }
                         isContinue = timeStamp-- > 1;
                         String[] times = CountDownUtil.secToTimes(timeStamp, separateType, isCloseDay);
@@ -1450,10 +1477,13 @@ public class CountDownView extends LinearLayout {
                             currentCountDownView.countDownEndListener.onCountDownEnd();
                     }
                     //倒计时提前通知
-                    if (!currentCountDownView.isNotification) {
+                    if (currentCountDownView.isNotification) {
                         if (currentCountDownView.countDownBringForwardNotificationListener != null) {
-                            currentCountDownView.countDownBringForwardNotificationListener.bringForwardNotification();
+                            if (!currentCountDownView.isNotificationFinish) {
+                                currentCountDownView.countDownBringForwardNotificationListener.bringForwardNotification();
+                            }
                         }
+                        currentCountDownView.isNotificationFinish = true;
                     }
                     break;
             }
