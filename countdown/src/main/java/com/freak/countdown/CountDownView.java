@@ -87,6 +87,7 @@ public class CountDownView extends LinearLayout {
     private TextView textViewDay, textViewColonDay, hourTextView, minuteTextView, secondTextView, hourColonTextView, minuteColonTextView, secondColonTextView;
     private long timeStamp;// 倒计时时间（单位秒）
     private boolean isContinue = false;// 是否开启倒计时
+    private boolean isNotification = false;// 是否提前通知
     private ExecutorService mExecutorService = Executors.newSingleThreadExecutor();// 缓存线程池
     private final String mChineseDatSeparate = "天";
     //小时与分钟分隔文字 例如19:20
@@ -1359,6 +1360,10 @@ public class CountDownView extends LinearLayout {
             public void run() {
                 try {
                     while (isContinue) {
+                        if (!isNotification) {
+                            long time = timeStamp;
+                            isNotification = time - 1 < 8;
+                        }
                         isContinue = timeStamp-- > 1;
                         String[] times = CountDownUtil.secToTimes(timeStamp, separateType, isCloseDay);
                         Message message = new Message();
@@ -1444,13 +1449,19 @@ public class CountDownView extends LinearLayout {
                         if (currentCountDownView.countDownEndListener != null)
                             currentCountDownView.countDownEndListener.onCountDownEnd();
                     }
+                    //倒计时提前通知
+                    if (!currentCountDownView.isNotification) {
+                        if (currentCountDownView.countDownBringForwardNotificationListener != null) {
+                            currentCountDownView.countDownBringForwardNotificationListener.bringForwardNotification();
+                        }
+                    }
                     break;
             }
         }
     }
 
     /**
-     * 定义倒计时结束接口
+     * 设置倒计时结束接口
      */
     public interface CountDownEndListener {
         void onCountDownEnd();
@@ -1458,8 +1469,23 @@ public class CountDownView extends LinearLayout {
 
     private CountDownEndListener countDownEndListener;
 
-    public void setCountDownEndListener(CountDownEndListener countDownEndListener) {
+    public CountDownView setCountDownEndListener(CountDownEndListener countDownEndListener) {
         this.countDownEndListener = countDownEndListener;
+        return this;
+    }
+
+    private CountDownBringForwardNotificationListener countDownBringForwardNotificationListener;
+
+    public CountDownView setCountDownBringForwardNotificationListener(CountDownBringForwardNotificationListener countDownBringForwardNotificationListener) {
+        this.countDownBringForwardNotificationListener = countDownBringForwardNotificationListener;
+        return this;
+    }
+
+    /**
+     * 设置倒计时结束前多少秒通知
+     */
+    public interface CountDownBringForwardNotificationListener {
+        void bringForwardNotification();
     }
 
 }
